@@ -45,8 +45,16 @@ def prepare_and_broadcast_basic_transaction(
     :return: broadcast transaction
     """
     # query the account information for the sender
+    from cosmpy.aerial.client import Account
     if account is None:
-        account = client.query_account(sender.address())
+        try:
+            account = client.query_account(sender.address())
+        except Exception as e:
+            str_not_found = f"account {sender.address()} not found"
+            if str_not_found in str(e):
+                account = Account(address=sender.address(), number=0, sequence=0)
+            else:
+                raise
 
     if gas_limit is not None:
         # simply build the fee from the provided gas limit

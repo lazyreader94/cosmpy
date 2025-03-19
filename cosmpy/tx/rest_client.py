@@ -75,7 +75,7 @@ class TxRestClient(TxInterface):
             f"{self.API_URL}/simulate",
             request,
         )
-        return Parse(response, SimulateResponse())
+        return Parse(json.dumps({"gas_info":json.loads(response)['gas_info']}).encode("utf-8"), SimulateResponse())
 
     def GetTx(self, request: GetTxRequest) -> GetTxResponse:
         """
@@ -90,6 +90,20 @@ class TxRestClient(TxInterface):
         dict_response = json.loads(response)
         self._fix_messages(dict_response["tx"]["body"]["messages"])
         self._fix_messages(dict_response["tx_response"]["tx"]["body"]["messages"])
+        if "tip" in dict_response["tx"]["auth_info"]:
+            del dict_response["tx"]["auth_info"]["tip"]
+        if "tip" in dict_response["tx_response"]["tx"]["auth_info"]:
+            del dict_response["tx_response"]["tx"]["auth_info"]["tip"]
+        if "events" in dict_response["tx_response"]:
+            del dict_response["tx_response"]["events"]
+        if "unordered" in dict_response["tx"]["body"]:
+            del dict_response["tx"]["body"]["unordered"]
+        if "unordered" in dict_response["tx_response"]["tx"]["body"]:
+            del dict_response["tx_response"]["tx"]["body"]["unordered"]
+        if "timeout_timestamp" in dict_response["tx"]["body"]:
+            del dict_response["tx"]["body"]["timeout_timestamp"]
+        if "timeout_timestamp" in dict_response["tx_response"]["tx"]["body"]:
+            del dict_response["tx_response"]["tx"]["body"]["timeout_timestamp"]
 
         return ParseDict(dict_response, GetTxResponse())
 

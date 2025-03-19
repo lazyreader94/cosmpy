@@ -102,6 +102,8 @@ def parse_url(url: str) -> ParsedUrl:
         raise RuntimeError(f"Unsupported url scheme: {result.scheme}")
 
     hostname = str(result.hostname)
+    if result.path:
+        hostname += "/"+str(result.path)
     port = default_port if result.port is None else int(result.port)
 
     return ParsedUrl(protocol=protocol, secure=secure, hostname=hostname, port=port)
